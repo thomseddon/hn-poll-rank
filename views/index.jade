@@ -1,0 +1,8 @@
+extends layout
+
+block content
+  - each val, favour in langs
+    div(style='float:left;width:49%')
+      h2 Most #{favour}d
+      - each lang in val
+        p #{lang.name} #{lang.score}
