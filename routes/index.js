@@ -14,28 +14,34 @@ var refresh = function () { console.log('running')
   request('http://news.ycombinator.com/item?id=6527104', function (err, res, body) {
     var $ = cheerio.load(body);
 
+    var newLangs = {
+      like: [],
+      dislike: []
+    };
+
     $('table table table').first().find('tr').each(function() {
       var langParts = this.find('font');
       if (langParts.length) {
         langParts = langParts.text().toLowerCase().split(' - ');
-        langs[langParts[1]].push({ name: langParts[0] });
+        newLangs[langParts[1]].push({ name: langParts[0] });
         return;
       }
 
       var score = this.find('.comhead span');
       if (score.length) {
         score = score.text().split(' ')[0];
-        langs[next][langs[next].length - 1].score = +score;
+        newLangs[next][newLangs[next].length - 1].score = +score;
         next = next === 'like' ? 'dislike' : 'like';
       }
     });
 
-    for (var favour in langs) {
-      langs[favour].sort(function (a, b) {
+    for (var favour in newLangs) {
+      newLangs[favour].sort(function (a, b) {
         return b.score - a.score;
       });
     }
 
+    langs = newLangs;
     console.log('done')
   });
 };
