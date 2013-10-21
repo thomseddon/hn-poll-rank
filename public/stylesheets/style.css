@@ -1,8 +1,19 @@
 body {
-  padding: 50px;
+  padding: 10px 50px;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
 a {
   color: #00B7FF;
+}
+
+.error {
+  color: red;
+}
+
+form input[type=text] {
+  border: 1px solid #ccc;
+  width: 40%;
+  padding: 2px 4px;
+  margin: 0 5px;
 }

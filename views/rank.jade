@@ -1,0 +1,14 @@
+extends layout
+
+block content
+  if err
+    p(class="error") Error: #{err}
+  else if nested
+    - each vals, title in list
+      div(style='float:left;width:49%')
+        h2 Most #{title}d
+        - each val in vals
+          p #{val.title} - #{val.score}
+  else
+    - each val in list
+      p #{val.title} - #{val.score}
