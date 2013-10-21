@@ -2,8 +2,14 @@
 var cheerio = require('cheerio'),
   request = require('request');
 
+var store = {};
+
 var sorter = function (a, b) {
   return b.score - a.score;
+};
+
+var key = function (post, nested) {
+  return post + (nested ? '-nested' : '');
 };
 
 var run = function (post, nested, done) {
@@ -28,13 +34,13 @@ var run = function (post, nested, done) {
         score = this.find('.comhead span');
 
       if (title.length) {
-        title = title.text(); console.log(title)
+        title = title.text();
         if (nested) {
           title = title.split(' - ');
 
           if (title.length < 2) {
-            err = 'Are you sure this is a nested poll?';
-            return done(err);
+            err = true;
+            return done('Are you sure this is a nested poll?');
           }
 
           vals[title[1].toLowerCase()].push({ title: title[0] });
@@ -47,8 +53,8 @@ var run = function (post, nested, done) {
           var ob = vals[next][vals[next].length - 1];
 
           if (!ob) {
-            err = 'Are you sure this is a nested poll?';
-            return done(err);
+            err = true;
+            return done('Are you sure this is a nested poll?');
           }
 
           ob.score = score;
@@ -82,14 +88,23 @@ exports.index = function(req, res) {
 };
 
 exports.rank = function(req, res) {
-  if (!req.query.post || !req.query.post.match(/^\d+$/)) {
+  var post = req.query.post;
+  if (!post || !post.match(/^\d+$/)) {
     return res.redirect('/?error=invalid-post');
   }
 
-  var nested = req.query.nested && req.query.nested === 'on';
-  run(req.query.post, nested, function (err, list) {
-    console.log(err)
-    res.render('rank', { err: err, list: list, nested: nested });
+  var nested = req.query.nested && req.query.nested === 'on',
+    k = key(post, nested);
+  res.render('rank', store[k] || {});
+
+  run(post, nested, function (err, vals) {
+    if (!err && vals && !vals.length) err = 'No poll found';
+
+    store[k] = {
+      err: err,
+      list: vals,
+      nested: nested
+    };
   });
 };
 

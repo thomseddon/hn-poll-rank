@@ -9,6 +9,8 @@ block content
         h2 Most #{title}d
         - each val in vals
           p #{val.title} - #{val.score}
-  else
+  else if list
     - each val in list
       p #{val.title} - #{val.score}
+  else
+    p Loading... (does not automatically refresh)
